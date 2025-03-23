@@ -1,7 +1,7 @@
 #syntax=docker/dockerfile:1
 
 # Versions
-FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
+FROM dunglas/frankenphp:1-php8.3-alpine AS frankenphp_upstream
 
 # The different stages of this Dockerfile are meant to be built into separate images
 # https://docs.docker.com/develop/develop-images/multistage-build/#stop-at-a-specific-build-stage
@@ -16,14 +16,13 @@ WORKDIR /app
 VOLUME /app/var/
 
 # persistent / runtime deps
-# hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends \
-	acl \
-	file \
-	gettext \
-	git \
-	&& rm -rf /var/lib/apt/lists/*
-
+# hadolint ignore=DL3018
+RUN apk add --no-cache \
+		acl \
+		file \
+		gettext \
+		git \
+	;
 RUN set -eux; \
 	install-php-extensions \
 		@composer \
@@ -39,6 +38,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PHP_INI_SCAN_DIR=":$PHP_INI_DIR/app.conf.d"
 
 ###> recipes ###
+###> doctrine/doctrine-bundle ###
+RUN install-php-extensions pdo_mysql
+###< doctrine/doctrine-bundle ###
 ###< recipes ###
 
 COPY --link frankenphp/conf.d/10-app.ini $PHP_INI_DIR/app.conf.d/
@@ -92,3 +94,5 @@ RUN set -eux; \
 	composer dump-env prod; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
+
+# CMD ["php", "bin/console", "doctrine:migrations:migrate", "--no-interaction", "--allow-no-migration"]

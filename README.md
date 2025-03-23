@@ -1,51 +1,68 @@
-# Symfony Docker
+# CommPeak Task Code
 
-A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony](https://symfony.com) web framework,
-with [FrankenPHP](https://frankenphp.dev) and [Caddy](https://caddyserver.com/) inside!
+## Technical Note: Symfony Application with Docker  
 
-![CI](https://github.com/dunglas/symfony-docker/workflows/CI/badge.svg)
+### Architecture  
+The application consists of two Docker containers:  
+1. **Application Container** – Runs PHP with Symfony, based on the official Symfony-recommended Docker setup. The Symfony code was used inside container.  
+2. **Database Container** – Runs MySQL as the data storage backend.  
 
-## Getting Started
+### Frontend Functionality  
+- The frontend periodically checks for new data every **60 seconds**.  
+- If new data is available, the table displaying call statistics is updated.  
 
-1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --no-cache` to build fresh images
-3. Run `docker compose up --pull always -d --wait` to set up and start a fresh Symfony project
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Run `docker compose down --remove-orphans` to stop the Docker containers.
+### Backend API  
+The backend exposes two API endpoints:  
+1. **Data Endpoint** – Returns new calls statistical data in JSON format.  
+2. **CSV Import Endpoint** – Recieve new call data as a CSV file.  
 
-## Features
+## Data Validation and Processing  
+- The application validates only the format of uploaded CSV files:  
+  - Must be **comma-separated**.  
+  - Must contain **exactly 5 fields per row**.  
+- No additional validation is performed:  
+  - **Duplicate records** are allowed.  
+  - **Field type validation** is enforced (e.g., integer, string), but no business logic validation is applied.  
+  - No checks are implemented for data correctness beyond structural validation, as this is considered **out of scope** for the task.  
 
-* Production, development and CI ready
-* Just 1 service by default
-* Blazing-fast performance thanks to [the worker mode of FrankenPHP](https://github.com/dunglas/frankenphp/blob/main/docs/worker.md) (automatically enabled in prod mode)
-* [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
-* Automatic HTTPS (in dev and prod)
-* HTTP/3 and [Early Hints](https://symfony.com/blog/new-in-symfony-6-3-early-hints) support
-* Real-time messaging thanks to a built-in [Mercure hub](https://symfony.com/doc/current/mercure.html)
-* [Vulcain](https://vulcain.rocks) support
-* Native [XDebug](docs/xdebug.md) integration
-* Super-readable configuration
+## Phone Number Continent Mapping  
+- The first **three digits** of the customer's phone number are used to determine the continent.  
+- It is acknowledged that country codes vary in length (**1–4+ digits**), but a **three-digit approach** was chosen for this implementation.  
 
-**Enjoy!**
+## Performance Optimization  
+- The application utilizes **caching** to reduce:  
+  - **Database queries**.  
+  - **Third-party API requests**.  
 
-## Docs
 
-1. [Options available](docs/options.md)
-2. [Using Symfony Docker with an existing project](docs/existing-project.md)
-3. [Support for extra services](docs/extra-services.md)
-4. [Deploying in production](docs/production.md)
-5. [Debugging with Xdebug](docs/xdebug.md)
-6. [TLS Certificates](docs/tls.md)
-7. [Using MySQL instead of PostgreSQL](docs/mysql.md)
-8. [Using Alpine Linux instead of Debian](docs/alpine.md)
-9. [Using a Makefile](docs/makefile.md)
-10. [Updating the template](docs/updating.md)
-11. [Troubleshooting](docs/troubleshooting.md)
+## 📝 Technologies
+- PHP 8.3
+- Symfony 7.2
+- Cache
+- MySQL 8.4.4
+- Bootstrap
+- Jquery 3.x
+- Docker
 
-## License
+### Clone the Repository:
+```
+ git clone git@github.com:andr435/commpeak_code.git
+```
+or
+```
+ git clone https://github.com/andr435/commpeak_code.git .
+```
 
-Symfony Docker is available under the MIT License.
+### 🚀 Usage
+Run the docker compose file:
+```
+docker compose up -d
+```
+The site will be available on [https://localhost](https://localhost)
 
-## Credits
 
-Created by [Kévin Dunglas](https://dunglas.dev), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
+## 🔧 Prerequisites
+-  Docker installed and running
+
+## 👤 Author
+Created by [Andrey Mussatov aka andr435](https://github.com/andr435).
